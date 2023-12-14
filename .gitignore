@@ -1,6 +1,6 @@
 # Docker stuff
 docker/cert/*
-docker/logs/*
+docker/logs/traefik/*
 
 # Environments
 .env

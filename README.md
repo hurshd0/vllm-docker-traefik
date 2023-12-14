@@ -7,26 +7,28 @@ Quick guide in deploying production ready vLLM secure server behind Traefik reve
 ### Step 1. Install required dependencies
 
 - Git
-- Docker
-- Docker Compose
+- Docker ~ v24
+- Docker Compose ~ v2
 
-Example installation on debian based systems:
-```bash
-sudo apt install git docker.io docker-compose
-```
+**Check below guides in installing Docker and Docker Compose on Ubuntu 20.04**
+
+- [Install Docker on Ubuntu 20.04](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04)
+- [Install Docker Compose on Ubuntu 20.04](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-compose-on-ubuntu-22-04)
+
+> Note: For NVIDIA GPU you will need docker compose version > v1.28.0, otherwise you will get error
 
 ### Step 2. Clone the respoistory
 ```bash
 git clone https://github.com/hurshd0/vllm-docker-traefik.git && cd vllm-docker-traefik
 ```
 
-### Step 3. Create .env file
+### Step 3. Create .env file 
 ```bash
 mv .env.example .env
 nano .env
 ```
 
-Fill in your environment variables
+**Fill in your environment variables**
 ```bash
 # Traefik settings
 ADMIN_EMAIL=<admin@your-domain.com> # e.g. ADMIN_EMAIL=admin@website.com
@@ -55,10 +57,20 @@ htpasswd -nBC 10 admin
 
 ### Step 4. Launch vLLM server
 ```
-docker-compose up -d
+docker compose up -d
+```
+### Edit the docker-compose.yml file per your config
+
+Example usage:
+
+- Scale with:
+```bash
+docker compose scale vllm=2
 ```
 
-Scale with:
+- Allocate more GPUs:
+
+```bash
+nvidia-smi -L
 ```
-docker-compose scale vllm=2
-```
+Edit `docker-compose.yml` to add more vLLM server instances 

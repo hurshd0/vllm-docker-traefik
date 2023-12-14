@@ -9,16 +9,19 @@ services:
       # Traefik static config
       # logs
       - --log=true
-      - --log.filePath=./docker/logs/traefik.log
-      - --log.level=INFO # (Default: error) DEBUG, INFO, WARN, ERROR, FATAL, PANIC
+      - --log.filePath=/logs/traefik.log
+      - --log.level=DEBUG # (Default: error) DEBUG, INFO, WARN, ERROR, FATAL, PANIC
       - --accessLog=true
-      - --accessLog.filePath=./docker/logs/access.log
+      - --accessLog.filePath=/logs/access.log
       - --accessLog.bufferingSize=100 # Configuring a buffer of 100 lines
       - --accessLog.filters.statusCodes=204-299,400-499,500-599
 
+      # LetsEncrypt Staging Server - uncomment when testing
+      - --certificatesResolvers.letsencrypt.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory
+
       # Make sure your firewall allows HTTP/HTTPS
-      - --entrypoints.web.address=:80
-      - --entrypoints.websecure.address=:443
+      - --entrypoints.http.address=:80
+      - --entrypoints.https.address=:443
 
       - --api=true
       - --providers.docker=true
@@ -44,13 +47,14 @@ services:
       - traefik.http.middlewares.to-https.redirectscheme.scheme=https
       - traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PASSWORD_HASH}
       
-      
     ports:
         # HTTP port
       - 80:80
       - 443:443
+
     volumes:
       - ./docker/cert/letsencrypt:/letsencrypt # Store's Let's Encrypt certificates here; make sure it's secure
+      - ./docker/logs/traefik:/logs
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
   #### 2. vLLM server 
@@ -62,6 +66,14 @@ services:
       --model ${MODEL_NAME}
     volumes:
       - ~/.cache/huggingface:/root/.cache/huggingface:rw
+    # Allocate NVIDIA GPU
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+              device_ids: ['0']
     labels:
       - "traefik.http.routers.vllm.tls=true"
       - "traefik.http.routers.vllm.entrypoints=https"
