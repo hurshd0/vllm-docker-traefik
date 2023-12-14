@@ -25,8 +25,8 @@ services:
  
       # LetsEncrypt Staging Server - uncomment when testing
       - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
-      - --certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web
-      - --certificatesresolvers.letsencrypt.acme.email=${EMAIL} # Your email for Let's Encrypt notifications
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=http
+      - --certificatesresolvers.letsencrypt.acme.email=${ADMIN_EMAIL} # Your email for Let's Encrypt notifications
       - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
     labels:
       # Redirect all HTTP traffic to HTTPS
@@ -52,9 +52,6 @@ services:
     volumes:
       - ./docker/cert/letsencrypt:/letsencrypt # Store's Let's Encrypt certificates here; make sure it's secure
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    networks:
-      - vllm_proxy
-     
 
   #### 2. vLLM server 
   vllm:
@@ -63,7 +60,6 @@ services:
     # vLLM server config
     command:
       --model ${MODEL_NAME}
-      --env "HUGGING_FACE_HUB_TOKEN=${HF_TOKEN}"
     volumes:
       - ~/.cache/huggingface:/root/.cache/huggingface:rw
     labels:
@@ -72,9 +68,3 @@ services:
       - "traefik.http.routers.vllm.rule=Host(`${DOMAIN}`)" # Replace with your domain
       - "traefik.http.services.vllm.loadbalancer.server.port: 8000" # Port of vLLM server
       - "traefik.http.routers.https.tls.certresolver=${CERT_RESOLVER}" # lets encrypt for public server
-    networks:
-      - vllm_proxy
-
-networks:
-  vllm_proxy:
-    external: true
