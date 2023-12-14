@@ -1,3 +1,6 @@
+# Docker stuff
+docker/cert/*
+docker/logs/*
 
 # Environments
 .env
