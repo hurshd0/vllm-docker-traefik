@@ -1,5 +1,17 @@
 # vLLM + Docker + Traefik 
 
+<style>
+.center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 45%;
+}
+</style>
+<img src="https://i.imgur.com/ZBQX3DW.jpeg" alt="cloud containerized app"  class="center"/>
+<br/>
+<hr/>
+
 Quick guide in deploying production ready Mistral-7B or Mixtral-8x7B vLLM secure server behind Traefik reverse proxy and load balancer.By default I am using HTTPS let's encrypt certificate, has automated renewal and comes with password protected Traefik dashboard.
 
 > __Note__  
