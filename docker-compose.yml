@@ -17,7 +17,7 @@ services:
       - --accessLog.filters.statusCodes=204-299,400-499,500-599
 
       # LetsEncrypt Staging Server - uncomment when testing
-      - --certificatesResolvers.letsencrypt.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory
+      # - --certificatesResolvers.letsencrypt.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory
 
       # Make sure your firewall allows HTTP/HTTPS
       - --entrypoints.http.address=:80
@@ -58,25 +58,26 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
   #### 2. vLLM server 
-  vllm:
+  vllm: 
     image: vllm/vllm-openai:latest
     restart: unless-stopped
     # vLLM server config
     command:
       --model ${MODEL_NAME}
+    ports:
+      - 8000:8000
     volumes:
       - ~/.cache/huggingface:/root/.cache/huggingface:rw
-    # Allocate NVIDIA GPU
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
               capabilities: [gpu]
-              device_ids: ['0']
+              device_ids: ['0'] # <--- Append GPU Device IDs here 
     labels:
       - "traefik.http.routers.vllm.tls=true"
       - "traefik.http.routers.vllm.entrypoints=https"
       - "traefik.http.routers.vllm.rule=Host(`${DOMAIN}`)" # Replace with your domain
-      - "traefik.http.services.vllm.loadbalancer.server.port: 8000" # Port of vLLM server
-      - "traefik.http.routers.https.tls.certresolver=${CERT_RESOLVER}" # lets encrypt for public server
+      - "traefik.http.routers.vllm.tls.certresolver=${CERT_RESOLVER}" # lets encrypt for public server
+    

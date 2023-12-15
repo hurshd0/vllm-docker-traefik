@@ -1,6 +1,11 @@
-# Traefik + Let's Encrypt + vLLM + Docker Compose 
+# vLLM + Docker + Traefik 
 
-Quick guide in deploying production ready vLLM secure server behind Traefik reverse proxy and load balance vLLM when scaling. HTTPS let's encrypt certificate renewal is automated and comes with password protected Traefik dashboard.
+Quick guide in deploying production ready Mistral-7B or Mixtral-8x7B vLLM secure server behind Traefik reverse proxy and load balancer.By default I am using HTTPS let's encrypt certificate, has automated renewal and comes with password protected Traefik dashboard.
+
+> __Note__  
+>
+> - You can disable Traefik dashboard  
+> - You can substitute Let's Encrypt with your own or CloudFlare or third-party   
 
 ## How to deploy on Public GPU Server with Real Domain Name
 
@@ -41,36 +46,66 @@ TRAEFIK_PASSWORD_HASH=<your-password-hash> # e.g. TRAEFIK_PASSWORD_HASH=$2y$10$O
 MODEL_NAME=<your-huggingface-hub-model> # e.g. MODEL_NAME="mistralai/Mistral-7B-Instruct-v0.1"
 HF_TOKEN=<your-huggingface-hub-token> # e.g. HF_TOKEN="hf_XXXXXXXXXXXXXXXXX"
 ```
-**Note**
 
-- `TRAEFIK_PASSWORD_HASH` you will need Apache Utilities Package to generate admin password
-> Install `sudo apt update && sudo apt install apache2-utils -y`
+#### [Optional] Set your own Traefik Dashboard admin password
 
-#### Set your own Traefik Dashboard admin password
+> **Note:**
+> - Install `sudo apt update && sudo apt install apache2-utils -y`
+
 ```bash
 htpasswd -nBC 10 admin
 ```
-
+#### Get Huggingface Hub Token
 - `HF_TOKEN` get it from [Huggingface Hub](https://huggingface.co/docs/hub/security-tokens)
 
-- You can leave `CERT_RESOLVER` empty if you test for local or internal deployment
-
-### Step 4. Launch vLLM server
+- You can leave `CERT_RESOLVER` empty if you want to test for local deployment
+```bash
+CERT_RESOLVER=
 ```
+
+### Step 4. Configure vLLM Server for SINGLE or MULTI-GPU setup
+
+#### A. For SINGLE GPU setup 
+
+Start vLLM server
+
+```bash
 docker compose up -d
 ```
-### Edit the docker-compose.yml file per your config
 
-Example usage:
-
-- Scale with:
+Check logs
 ```bash
-docker compose scale vllm=2
+docker compose logs
 ```
 
-- Allocate more GPUs:
+#### B. For MULTI-GPU setup serving Mixtral-8x7B 
 
+Get NVIDIA Device IDs
 ```bash
-nvidia-smi -L
+$ nvidia-smi -L
 ```
-Edit `docker-compose.yml` to add more vLLM server instances 
+
+Append it in `device_ids` list 
+```yaml
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+              device_ids: ['0'] 
+```
+Customize Docker Compose YAML file
+
+Change the `docker-compose.yml` file in `vllm` section
+
+```yaml
+    command:
+      --model ${MODEL_NAME}
+      --tensor-parallel-size 2 # Based on GPU count, should be even number of GPUs
+      --load-format pt # needed since both `pt` and `safetensors` are available
+```
+
+
+
+
