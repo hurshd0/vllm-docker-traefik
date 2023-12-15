@@ -1,14 +1,7 @@
 # vLLM + Docker + Traefik 
 
-<style>
-.center {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  width: 45%;
-}
-</style>
-<img src="https://i.imgur.com/ZBQX3DW.jpeg" alt="cloud containerized app"  class="center"/>
+
+<img src="https://i.imgur.com/ZBQX3DW.jpeg" alt="cloud containerized app"  width="45%"/>
 <br/>
 <hr/>
 
