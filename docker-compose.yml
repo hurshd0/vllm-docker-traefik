@@ -17,7 +17,7 @@ services:
       - --accessLog.filters.statusCodes=204-299,400-499,500-599
 
       # LetsEncrypt Staging Server - uncomment when testing
-      # - --certificatesResolvers.letsencrypt.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory
+      #- --certificatesResolvers.letsencrypt.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory
 
       # Make sure your firewall allows HTTP/HTTPS
       - --entrypoints.http.address=:80
@@ -25,6 +25,7 @@ services:
 
       - --api=true
       - --providers.docker=true
+      - --providers.docker.exposedByDefault=false
  
       # LetsEncrypt Staging Server - uncomment when testing
       - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
@@ -33,18 +34,18 @@ services:
       - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
     labels:
       # Redirect all HTTP traffic to HTTPS
-      - traefik.http.routers.to-https.rule=HostRegexp(`{host:.+}`)
       - traefik.http.routers.to-https.entrypoints=http
+      - traefik.http.routers.to-https.rule=HostRegexp(`{host:.+}`)
       - traefik.http.routers.to-https.middlewares=to-https
-
+      - traefik.http.middlewares.to-https.redirectscheme.scheme=https
+      # HTTP Routers
       - traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN}`)
       - traefik.http.routers.traefik.entrypoints=https
+      ## Services - API
       - traefik.http.routers.traefik.middlewares=auth
       - traefik.http.routers.traefik.service=api@internal
       - traefik.http.routers.traefik.tls=true
       - traefik.http.routers.traefik.tls.certresolver=${CERT_RESOLVER}
-
-      - traefik.http.middlewares.to-https.redirectscheme.scheme=https
       - traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PASSWORD_HASH}
       
     ports:
@@ -76,8 +77,8 @@ services:
               capabilities: [gpu]
               device_ids: ['0'] # <--- Append GPU Device IDs here 
     labels:
+      - "traefik.enable=true"
       - "traefik.http.routers.vllm.tls=true"
       - "traefik.http.routers.vllm.entrypoints=https"
       - "traefik.http.routers.vllm.rule=Host(`${DOMAIN}`)" # Replace with your domain
       - "traefik.http.routers.vllm.tls.certresolver=${CERT_RESOLVER}" # lets encrypt for public server
-    
