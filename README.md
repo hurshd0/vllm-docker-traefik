@@ -10,7 +10,7 @@ Quick guide in deploying production ready Mistral-7B or Mixtral-8x7B vLLM secure
 >
 > - You can disable Traefik dashboard for keep it internal access only
 > - You can substitute Let's Encrypt with your own or CloudFlare or third-party for DNS challenge
-> - Add, Crowdsec or WAF like Cloudflare to secure your DNS Zone and any bot, or Cybersecurity threats   
+> - Add, Crowdsec or WAF through Cloudflare to secure your DNS Zone and any bot, or Cybersecurity threats   
 
 ## How to deploy on Public GPU Server with Real Domain Name
 
@@ -19,13 +19,15 @@ Quick guide in deploying production ready Mistral-7B or Mixtral-8x7B vLLM secure
 - Git
 - Docker ~ v24
 - Docker Compose ~ v2
+- CUDA 12 (NVIDIA GPU gen - Ampere, Hopper) 
 
 **Check below guides in installing Docker and Docker Compose on Ubuntu 20.04**
 
 - [Install Docker on Ubuntu 20.04](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04)
 - [Install Docker Compose on Ubuntu 20.04](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-compose-on-ubuntu-22-04)
+- [Install CUDA 12](https://developer.nvidia.com/cuda-downloads) 
 
-> Note: For NVIDIA GPU you will need docker compose version > v1.28.0, otherwise you will get error
+> Note: To use NVIDIA GPU you will need docker compose version > v1.28.0, otherwise you will get error
 
 ### Step 2. Clone the respoistory
 ```bash

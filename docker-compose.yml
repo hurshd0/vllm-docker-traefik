@@ -7,7 +7,7 @@ services:
     restart: unless-stopped
     command:
       # Traefik static config
-      # logs
+      ## logs
       - --log=true
       - --log.filePath=/logs/traefik.log
       - --log.level=DEBUG # (Default: error) DEBUG, INFO, WARN, ERROR, FATAL, PANIC
@@ -17,31 +17,34 @@ services:
       - --accessLog.filters.statusCodes=204-299,400-499,500-599
 
       # LetsEncrypt Staging Server - uncomment when testing
-      #- --certificatesResolvers.letsencrypt.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory
+      # - --certificatesResolvers.letsencrypt.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory
 
       # Make sure your firewall allows HTTP/HTTPS
       - --entrypoints.http.address=:80
       - --entrypoints.https.address=:443
 
+      # API Dashboard
       - --api=true
+
+      # Docker
       - --providers.docker=true
       - --providers.docker.exposedByDefault=false
  
-      # LetsEncrypt Staging Server - uncomment when testing
       - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
       - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=http
       - --certificatesresolvers.letsencrypt.acme.email=${ADMIN_EMAIL} # Your email for Let's Encrypt notifications
       - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+
     labels:
       # Redirect all HTTP traffic to HTTPS
       - traefik.http.routers.to-https.entrypoints=http
       - traefik.http.routers.to-https.rule=HostRegexp(`{host:.+}`)
       - traefik.http.routers.to-https.middlewares=to-https
       - traefik.http.middlewares.to-https.redirectscheme.scheme=https
-      # HTTP Routers
+
+      ## Services - API Dashboard
       - traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN}`)
       - traefik.http.routers.traefik.entrypoints=https
-      ## Services - API
       - traefik.http.routers.traefik.middlewares=auth
       - traefik.http.routers.traefik.service=api@internal
       - traefik.http.routers.traefik.tls=true
